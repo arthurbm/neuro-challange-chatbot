@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "credit_agent": "./src/agent.py:agent"
+  },
+  "env": ".env"
+}
