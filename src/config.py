@@ -97,6 +97,19 @@ class FormattingConfig(BaseSettings):
     language: str = "pt-BR"
 
 
+class GCSConfig(BaseSettings):
+    """Configurações do Google Cloud Storage."""
+
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+
+    project_id: str = Field(default="neuro-test-476419", alias="GCS_PROJECT_ID")
+    bucket_name: str = Field(default="neuro-test", alias="GCS_BUCKET_NAME")
+
+    # Prioridade: JSON_CONTENT > JSON (path) > ADC
+    service_account_json: Optional[str] = Field(default=None, alias="GCS_SERVICE_ACCOUNT_JSON")
+    service_account_json_content: Optional[str] = Field(default=None, alias="GCS_SERVICE_ACCOUNT_JSON_CONTENT")
+
+
 class Config:
     """Configuração centralizada da aplicação."""
 
@@ -106,6 +119,7 @@ class Config:
         self.langsmith = LangSmithConfig()
         self.guardrails = GuardrailsConfig()
         self.formatting = FormattingConfig()
+        self.gcs = GCSConfig()
 
         # Paths
         self.project_root = Path(__file__).parent.parent
