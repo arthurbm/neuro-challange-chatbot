@@ -174,12 +174,17 @@ class BusinessDictionary:
         {
             "nl": "Quantas pessoas têm mais de 60 anos?",
             "sql": 'SELECT COUNT(*) as volume FROM credit_train WHERE "IDADE" >= 60',
-            "explicacao": "Filtra por idade e conta registros",
+            "explicacao": "Filtra por idade e conta registros - SEM GROUP BY, então SEM HAVING",
+        },
+        {
+            "nl": "Qual a taxa de inadimplência de mulheres de classe baixa?",
+            "sql": 'SELECT AVG("TARGET") as taxa_inadimplencia, COUNT(*) as total FROM credit_train WHERE "SEXO" = \'F\' AND "CLASSE_SOCIAL" IN (\'c\', \'d\', \'e\')',
+            "explicacao": "Filtro simples com múltiplas condições - SEM GROUP BY, então SEM HAVING. Classe baixa = c, d ou e",
         },
         {
             "nl": "Taxa de inadimplência por sexo e classe social",
             "sql": 'SELECT "SEXO", LOWER(TRIM("CLASSE_SOCIAL")) as classe, AVG("TARGET") as taxa FROM credit_train GROUP BY "SEXO", "CLASSE_SOCIAL" HAVING COUNT(*) >= 20',
-            "explicacao": "Agrupa por duas dimensões, normaliza classe social",
+            "explicacao": "Agrupa por duas dimensões, normaliza classe social, aplica k-anonimato",
         },
         {
             "nl": "Evolução mensal da inadimplência",
@@ -189,7 +194,7 @@ class BusinessDictionary:
         {
             "nl": "Compare inadimplência entre homens e mulheres",
             "sql": 'SELECT "SEXO", COUNT(*) as n, AVG("TARGET") as taxa_inadimplencia FROM credit_train WHERE "SEXO" IS NOT NULL GROUP BY "SEXO" HAVING COUNT(*) >= 20',
-            "explicacao": "Compara taxas entre sexos, filtra nulos",
+            "explicacao": "Compara taxas entre sexos com GROUP BY, então usa HAVING para k-anonimato",
         },
     ]
 

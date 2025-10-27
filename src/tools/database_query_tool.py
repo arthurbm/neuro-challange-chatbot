@@ -8,6 +8,7 @@ from typing import Any
 
 from langchain.tools import tool
 from langchain_openai import ChatOpenAI
+from langsmith import traceable
 from pydantic import BaseModel, Field
 
 from src.config import config
@@ -24,6 +25,7 @@ class QueryDatabaseInput(BaseModel):
     )
 
 
+@traceable(name="generate_sql", metadata={"component": "sql_generation"})
 def _generate_sql_with_llm(question: str) -> str:
     """
     Gera SQL a partir de uma pergunta em linguagem natural.
@@ -59,11 +61,23 @@ def _generate_sql_with_llm(question: str) -> str:
 
 **Regras importantes:**
 1. Use SEMPRE aspas duplas nas colunas (ex: "UF", "TARGET")
-2. Aplique k-anonimato: HAVING COUNT(*) >= 20 em agregações
-3. Apenas queries SELECT (read-only)
-4. Use DATE_TRUNC para agregações temporais
-5. Normalize strings com UPPER/LOWER/TRIM quando apropriado
-6. Retorne APENAS o SQL, sem explicações ou markdown
+2. Apenas queries SELECT (read-only) - nunca INSERT, UPDATE, DELETE, DROP
+3. Use DATE_TRUNC para agregações temporais
+4. Normalize strings com UPPER/LOWER/TRIM quando apropriado
+5. Retorne APENAS o SQL, sem explicações ou markdown
+
+**K-anonimato (privacidade):**
+- Em queries com GROUP BY: adicione HAVING COUNT(*) >= 20
+- Em queries SEM GROUP BY (filtros simples): NÃO use HAVING
+- Exemplos:
+  ✅ CORRETO: SELECT "UF", AVG("TARGET") FROM ... GROUP BY "UF" HAVING COUNT(*) >= 20
+  ✅ CORRETO: SELECT AVG("TARGET") FROM ... WHERE "SEXO" = 'F' AND "CLASSE_SOCIAL" IN ('c','d','e')
+  ❌ ERRADO: SELECT AVG("TARGET") FROM ... WHERE ... HAVING COUNT(*) >= 20 (sem GROUP BY)
+
+**Valores válidos para filtros:**
+- CLASSE_SOCIAL: 'a' (alta), 'b' (média-alta), 'c', 'd', 'e' (baixa)
+- Para "classe baixa": use IN ('c', 'd', 'e')
+- SEXO: 'M' ou 'F'
 
 **Sua tarefa:**
 Gere um SQL válido para responder à pergunta abaixo.
@@ -89,6 +103,7 @@ Gere um SQL válido para responder à pergunta abaixo.
     return sql
 
 
+@traceable(name="execute_sql_with_retry", metadata={"component": "sql_execution"})
 def _execute_with_retry(sql: str, question: str, max_retries: int = 3) -> list[dict[str, Any]]:
     """
     Executa SQL com retry e auto-correção.
@@ -170,6 +185,7 @@ Corrija o SQL para resolver o erro. Retorne APENAS o SQL corrigido, sem explica�
     )
 
 
+@traceable(name="format_response", metadata={"component": "response_formatting"})
 def _format_response_natural_language(
     question: str, data: list[dict[str, Any]], sql: str
 ) -> str:
