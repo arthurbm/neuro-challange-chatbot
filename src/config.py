@@ -55,7 +55,8 @@ class LangSmithConfig(BaseSettings):
 
     tracing_enabled: bool = Field(default=True, alias="LANGSMITH_TRACING")
     api_key: str = Field(default="", alias="LANGSMITH_API_KEY")
-    project: str = Field(default="credit-chatbot", alias="LANGSMITH_PROJECT")
+    # Default "default" - no deployment, será sobrescrito pelo nome do deployment automaticamente
+    project: str = Field(default="default", alias="LANGSMITH_PROJECT")
     endpoint: str = Field(default="https://api.smith.langchain.com", alias="LANGSMITH_ENDPOINT")
 
 
