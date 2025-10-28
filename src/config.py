@@ -127,12 +127,17 @@ class Config:
         self.eval_dir = self.project_root / "eval"
 
     def setup_langsmith(self):
-        """Configura variáveis de ambiente para LangSmith."""
+        """Configura variáveis de ambiente para LangSmith.
+
+        Usa setdefault() para preservar variáveis automáticas do deployment.
+        No LangSmith Studio, o control plane define essas variáveis automaticamente,
+        então não devemos sobrescrevê-las.
+        """
         if self.langsmith.tracing_enabled:
-            os.environ["LANGSMITH_TRACING"] = "true"
-            os.environ["LANGSMITH_API_KEY"] = self.langsmith.api_key
-            os.environ["LANGSMITH_PROJECT"] = self.langsmith.project
-            os.environ["LANGSMITH_ENDPOINT"] = self.langsmith.endpoint
+            os.environ.setdefault("LANGSMITH_TRACING", "true")
+            os.environ.setdefault("LANGSMITH_API_KEY", self.langsmith.api_key)
+            os.environ.setdefault("LANGSMITH_PROJECT", self.langsmith.project)
+            os.environ.setdefault("LANGSMITH_ENDPOINT", self.langsmith.endpoint)
 
 
 # Instância global

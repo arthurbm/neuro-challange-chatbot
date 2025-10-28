@@ -1,0 +1,42 @@
+{
+  "taxa_por_uf": {
+    "question": "Qual a taxa de inadimplência por UF?",
+    "sql": "SELECT \"UF\", AVG(\"TARGET\") as taxa_inadimplencia FROM credit_train GROUP BY \"UF\" HAVING COUNT(*) >= 20 ORDER BY taxa_inadimplencia DESC",
+    "result": [
+      {"UF": "RJ", "taxa_inadimplencia": 0.12},
+      {"UF": "MG", "taxa_inadimplencia": 0.095},
+      {"UF": "SP", "taxa_inadimplencia": 0.085}
+    ]
+  },
+  "taxa_geral": {
+    "question": "Qual a taxa de inadimplência geral?",
+    "sql": "SELECT AVG(\"TARGET\") as taxa_inadimplencia FROM credit_train",
+    "result": [
+      {"taxa_inadimplencia": 0.0923}
+    ]
+  },
+  "volume_total": {
+    "question": "Quantos registros existem?",
+    "sql": "SELECT COUNT(*) as volume FROM credit_train",
+    "result": [
+      {"volume": 170000}
+    ]
+  },
+  "evolucao_mensal": {
+    "question": "Evolução mensal da inadimplência",
+    "sql": "SELECT DATE_TRUNC('month', \"REF_DATE\") as mes, AVG(\"TARGET\") as taxa FROM credit_train GROUP BY 1 HAVING COUNT(*) >= 20 ORDER BY 1",
+    "result": [
+      {"mes": "2017-01-01", "taxa": 0.082},
+      {"mes": "2017-02-01", "taxa": 0.085},
+      {"mes": "2017-03-01", "taxa": 0.090}
+    ]
+  },
+  "taxa_por_sexo": {
+    "question": "Taxa de inadimplência por sexo",
+    "sql": "SELECT \"SEXO\", AVG(\"TARGET\") as taxa, COUNT(*) as n FROM credit_train GROUP BY \"SEXO\" HAVING COUNT(*) >= 20",
+    "result": [
+      {"SEXO": "M", "taxa": 0.08, "n": 85000},
+      {"SEXO": "F", "taxa": 0.10, "n": 85000}
+    ]
+  }
+}

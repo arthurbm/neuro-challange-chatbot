@@ -24,10 +24,59 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "agentevals>=0.0.9",
     "ipykernel>=7.0.1",
     "matplotlib>=3.10.7",
     "pandas>=2.3.3",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
     "ruff>=0.14.2",
     "seaborn>=0.13.2",
     "sqlalchemy>=2.0.44",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: fast unit tests without external dependencies",
+    "integration: integration tests requiring external services (Docker DB, etc)",
+    "langsmith: tests that log results to LangSmith",
+]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "tests/*",
+    "**/__pycache__/*",
+    "**/site-packages/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
 ]
